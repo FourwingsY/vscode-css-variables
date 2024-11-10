@@ -12,17 +12,20 @@ import {
   ColorInformation,
   FileChangeType,
   Hover,
-} from 'vscode-languageserver/node';
-import * as fs from 'fs';
-import { Position, TextDocument } from 'vscode-languageserver-textdocument';
-import isColor from './utils/isColor';
-import { uriToPath } from './utils/protocol';
-import { findAll } from './utils/findAll';
-import { indexToPosition } from './utils/indexToPosition';
-import { getCurrentWord } from './utils/getCurrentWord';
-import { isInFunctionExpression } from './utils/isInFunctionExpression';
-import CSSVariableManager, { CSSVariablesSettings, defaultSettings } from './CSSVariableManager';
-import { formatHex } from 'culori';
+} from "vscode-languageserver/node";
+import * as fs from "fs";
+import { Position, TextDocument } from "vscode-languageserver-textdocument";
+import isColor from "./utils/isColor";
+import { uriToPath } from "./utils/protocol";
+import { findAll } from "./utils/findAll";
+import { indexToPosition } from "./utils/indexToPosition";
+import { getCurrentWord } from "./utils/getCurrentWord";
+import { isInFunctionExpression } from "./utils/isInFunctionExpression";
+import CSSVariableManager, {
+  CSSVariablesSettings,
+  defaultSettings,
+} from "./CSSVariableManager";
+import { formatHex } from "culori";
 
 // Create a connection for the server, using Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
@@ -87,13 +90,13 @@ connection.onInitialized(async () => {
   }
   if (hasWorkspaceFolderCapability) {
     connection.workspace.onDidChangeWorkspaceFolders((_event) => {
-      connection.console.log('Workspace folder change event received.');
+      connection.console.log("Workspace folder change event received.");
     });
   }
 
   const workspaceFolders = await connection.workspace.getWorkspaceFolders();
   const validFolders = workspaceFolders
-    ?.map((folder) => uriToPath(folder.uri) || '')
+    ?.map((folder) => uriToPath(folder.uri) || "")
     .filter((path) => !!path);
 
   const settings = await getDocumentSettings();
@@ -117,7 +120,7 @@ connection.onDidChangeConfiguration(async (change) => {
       .getWorkspaceFolders()
       .then((folders) =>
         folders
-          ?.map((folder) => uriToPath(folder.uri) || '')
+          ?.map((folder) => uriToPath(folder.uri) || "")
           .filter((path) => !!path)
       );
 
@@ -133,13 +136,13 @@ connection.onDidChangeConfiguration(async (change) => {
 });
 
 function getDocumentSettings(): Thenable<CSSVariablesSettings> {
-  const resource = 'all';
+  const resource = "all";
   if (!hasConfigurationCapability) {
     return Promise.resolve(globalSettings);
   }
   let result = documentSettings.get(resource);
   if (!result) {
-    result = connection.workspace.getConfiguration('cssVariables');
+    result = connection.workspace.getConfiguration("cssVariables");
     documentSettings.set(resource, result);
   }
   return result;
@@ -147,7 +150,7 @@ function getDocumentSettings(): Thenable<CSSVariablesSettings> {
 
 // Only keep settings for open documents
 documents.onDidClose((e) => {
-  connection.console.log('Closed: ' + e.document.uri);
+  connection.console.log("Closed: " + e.document.uri);
   documentSettings.delete(e.document.uri);
 });
 
@@ -160,7 +163,7 @@ connection.onDidChangeWatchedFiles((_change) => {
       if (change.type === FileChangeType.Deleted) {
         cssVariableManager.clearFileCache(filePath);
       } else {
-        const content = fs.readFileSync(filePath, 'utf8');
+        const content = fs.readFileSync(filePath, "utf8");
         cssVariableManager.parseCSSVariablesFromText({
           content,
           filePath,
@@ -197,7 +200,7 @@ connection.onCompletion(
         kind: isColor(varSymbol.value)
           ? CompletionItemKind.Color
           : CompletionItemKind.Variable,
-        sortText: 'z',
+        sortText: "z",
       };
 
       if (isColor(varSymbol.value)) {
@@ -218,9 +221,11 @@ connection.onCompletion(
 
 // This handler resolves additional information for the item selected in
 // the completion list.
-connection.onCompletionResolve((item: CompletionItem): CompletionItem => {
-  return item;
-});
+connection.onCompletionResolve(
+  (item: CompletionItem): CompletionItem => {
+    return item;
+  }
+);
 
 connection.onDocumentColor((params): ColorInformation[] => {
   const document = documents.get(params.textDocument.uri);
@@ -231,7 +236,7 @@ connection.onDocumentColor((params): ColorInformation[] => {
   const colors: ColorInformation[] = [];
 
   const text = document.getText();
-  const matches = findAll(/var\((?<varName>--[a-z-0-9]+)/g, text);
+  const matches = findAll(/var\((?<varName>--[a-zA-Z-0-9]+)/g, text);
 
   const globalStart: Position = { line: 0, character: 0 };
 
